@@ -66,6 +66,40 @@ namespace addScore {
                 MessageBox.Show(ex.Message);
             }
         }
+        private void All_reset() {
+            Api_call("lock");
 
+            Send_query("DELETE FROM db_table");
+            Send_query("DELETE FROM db_table_state");
+            Send_query("DELETE FROM db_table_who");
+            //マッチからテーブルナンバーと組み合わせを取得
+            string queryString = "SELECT [MatchId],[TableNumber] FROM [Match] WHERE RoundId =(SELECT Max([RoundId]) FROM [Round] WHERE [TournamentId]=" + select_id + ")";
+            List<List<string>> newround_list = Access_command(queryString);
+            List<TeamMatchResult_item> TeamMatchResult_list = Get_TeamMatchResult();
+            List<Team_item> Team_list = Get_Team();
+
+            foreach (List<string> _newround_list in newround_list) {
+                string TableNumber = _newround_list[1];
+                string MatchId = _newround_list[0];
+
+                List<string> gplist = Get_p(TeamMatchResult_list, Team_list, MatchId);
+                object p_name = gplist[0];
+                object p2_name = gplist[1];
+
+                Send_query("INSERT INTO db_table VALUES(" + TableNumber + ",\"" + p_name + "\",\"" + p2_name + "\");");
+                Send_query("INSERT INTO db_table_state VALUES(" + TableNumber + ",\"nor\",0);");
+            }
+
+            //現在のラウンド数　foreachである必要は無い
+            string queryString_round = "SELECT [Number] FROM [Round] WHERE [TournamentId]=" + select_id + "";
+            List<List<string>> roundnum_list = Access_command(queryString_round);
+            foreach (List<string> num in roundnum_list) {
+                round_lbl.Text = num[0].ToString();
+                now_round = Int32.Parse(num[0]);
+
+                Send_query("INSERT INTO db_round(round_num) VALUES(" + now_round + ");");
+            }
+            Api_call("reset");
+        }
     }
 }
