@@ -72,6 +72,7 @@ namespace addScore {
             Send_query("DELETE FROM db_table");
             Send_query("DELETE FROM db_table_state");
             Send_query("DELETE FROM db_table_who");
+            Send_query("DELETE FROM db_round");
             //マッチからテーブルナンバーと組み合わせを取得
             string queryString = "SELECT [MatchId],[TableNumber] FROM [Match] WHERE RoundId =(SELECT Max([RoundId]) FROM [Round] WHERE [TournamentId]=" + select_id + ")";
             List<List<string>> newround_list = Access_command(queryString);
